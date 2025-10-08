@@ -21,37 +21,50 @@ const getSkyStyle = () => {
   const position = (totalMinutes / (24 * 60)) * 100;
   const isDay = hour >= 6 && hour < 20;
   
-  // Estilo Google Weather / Clima del Celular
-  let background, celestialBody, timeOfDay;
+  let background, celestialBody, timeOfDay, sunGlow, moonGlow;
+  
+  // Gradiente de luz de izquierda a derecha que representa sol -> luna
   
   if (hour >= 5 && hour < 8) {
-    // Amanecer - Gradiente suave naranja/azul
-    background = 'linear-gradient(135deg, #FFEED9 0%, #B3D9FF 100%)';
+    // Amanecer - Sol amarillo/naranja brillante a la izquierda, suave a la derecha
+    background = '#E8F4F8'; // Fondo celeste suave
+    sunGlow = 'radial-gradient(ellipse 800px 400px at 0% 0%, rgba(255, 220, 100, 0.6) 0%, rgba(255, 180, 80, 0.3) 30%, transparent 70%)';
+    moonGlow = 'radial-gradient(ellipse 600px 300px at 100% 0%, rgba(255, 255, 255, 0.1) 0%, transparent 50%)';
     celestialBody = '🌅';
     timeOfDay = 'Amanecer';
   } else if (hour >= 8 && hour < 12) {
-    // Mañana - Azul claro muy suave
-    background = 'linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%)';
+    // Mañana - Sol amarillo brillante a la izquierda
+    background = '#E3F2FD';
+    sunGlow = 'radial-gradient(ellipse 900px 450px at 0% 0%, rgba(255, 235, 120, 0.7) 0%, rgba(255, 200, 100, 0.4) 30%, transparent 70%)';
+    moonGlow = 'radial-gradient(ellipse 500px 250px at 100% 0%, rgba(245, 245, 255, 0.15) 0%, transparent 50%)';
     celestialBody = '☀️';
     timeOfDay = 'Mañana';
   } else if (hour >= 12 && hour < 16) {
-    // Mediodía - Azul cielo vibrante
-    background = 'linear-gradient(135deg, #87CEEB 0%, #B3E5FC 50%, #E1F5FE 100%)';
+    // Mediodía - Sol muy brillante a la izquierda
+    background = '#87CEEB';
+    sunGlow = 'radial-gradient(ellipse 1000px 500px at 0% 0%, rgba(255, 245, 140, 0.8) 0%, rgba(255, 220, 120, 0.5) 30%, transparent 70%)';
+    moonGlow = 'radial-gradient(ellipse 400px 200px at 100% 0%, rgba(240, 240, 250, 0.2) 0%, transparent 50%)';
     celestialBody = '🔆';
     timeOfDay = 'Mediodía';
   } else if (hour >= 16 && hour < 19) {
-    // Tarde - Gradiente dorado/naranja
-    background = 'linear-gradient(135deg, #FFD54F 0%, #FFB74D 50%, #FF8A65 100%)';
+    // Tarde - Sol dorado/naranja a la izquierda
+    background = '#FFD9A0';
+    sunGlow = 'radial-gradient(ellipse 850px 425px at 0% 0%, rgba(255, 180, 80, 0.75) 0%, rgba(255, 140, 60, 0.45) 30%, transparent 70%)';
+    moonGlow = 'radial-gradient(ellipse 550px 275px at 100% 0%, rgba(255, 250, 240, 0.2) 0%, transparent 50%)';
     celestialBody = '🌇';
     timeOfDay = 'Tarde';
   } else if (hour >= 19 && hour < 21) {
-    // Atardecer - Púrpura/naranja
-    background = 'linear-gradient(135deg, #6A1B9A 0%, #E91E63 50%, #FF9800 100%)';
+    // Atardecer - Sol rojizo/naranja apagándose, luna empezando a brillar
+    background = '#6A4C93';
+    sunGlow = 'radial-gradient(ellipse 700px 350px at 0% 0%, rgba(255, 120, 60, 0.5) 0%, rgba(200, 80, 100, 0.3) 30%, transparent 70%)';
+    moonGlow = 'radial-gradient(ellipse 650px 325px at 100% 0%, rgba(255, 255, 255, 0.35) 0%, rgba(220, 220, 255, 0.2) 40%, transparent 60%)';
     celestialBody = '🌆';
     timeOfDay = 'Atardecer';
   } else {
-    // Noche - Azul oscuro/índigo
-    background = 'linear-gradient(135deg, #0D47A1 0%, #1A237E 50%, #311B92 100%)';
+    // Noche - Fondo oscuro, sol apagado, luna blanca brillante a la derecha
+    background = '#0D1B2A';
+    sunGlow = 'radial-gradient(ellipse 400px 200px at 0% 0%, rgba(100, 100, 150, 0.15) 0%, transparent 50%)';
+    moonGlow = 'radial-gradient(ellipse 700px 350px at 100% 0%, rgba(255, 255, 255, 0.5) 0%, rgba(220, 230, 255, 0.3) 40%, transparent 70%)';
     celestialBody = '🌙';
     timeOfDay = 'Noche';
   }
@@ -61,6 +74,8 @@ const getSkyStyle = () => {
     celestialBody,
     isDay,
     background,
+    sunGlow,
+    moonGlow,
     timeOfDay,
     hour: now.getHours(),
     minutes: now.getMinutes()

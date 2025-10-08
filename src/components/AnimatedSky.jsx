@@ -5,12 +5,27 @@ export const AnimatedSky = () => {
 
   return (
     <div 
-      className="fixed inset-0 transition-all duration-1000 z-0"
+      className="fixed inset-0 transition-all duration-[2000ms] ease-in-out z-0"
       style={{ 
-        background: sky.background,
-        backgroundAttachment: 'fixed'
+        backgroundColor: sky.background
       }}
     >
+      {/* Resplandor del sol (izquierda arriba) */}
+      <div 
+        className="absolute inset-0 transition-all duration-[2000ms] ease-in-out"
+        style={{ 
+          background: sky.sunGlow
+        }}
+      ></div>
+
+      {/* Resplandor de la luna (derecha arriba) */}
+      <div 
+        className="absolute inset-0 transition-all duration-[2000ms] ease-in-out"
+        style={{ 
+          background: sky.moonGlow
+        }}
+      ></div>
+
       {/* Efectos de nubes sutiles */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-32 h-16 bg-white rounded-full blur-xl"></div>
