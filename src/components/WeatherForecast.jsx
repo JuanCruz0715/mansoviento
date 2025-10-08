@@ -109,11 +109,11 @@ const DayDetails = ({ day }) => {
           label="Temp Máx/Mín" 
           value={`${summary.tempMax}° / ${summary.tempMin}°`} 
         />
-        <SummaryItem 
-          icon={Wind} 
-          label="Rachas km/h" 
-          value={summary.maxWindGusts} 
-        />
+       <SummaryItem 
+  icon={Wind} 
+  label="Rachas Máx km/h" 
+  value={summary.maxWindGusts} 
+/>
         <SummaryItem 
           icon={CloudRain} 
           label="Lluvia mm" 
@@ -153,45 +153,76 @@ const SummaryItem = ({ icon: Icon, label, value, subtext, color = 'text-gray-800
 );
 
 const CriticalHours = ({ hours }) => {
+  // Encontrar la hora con la racha máxima de viento Sur
+  const surMaxGust = Math.max(...hours.map(h => {
+    const windType = getWindType(h.windDirection);
+    return (windType.type === 'SUR' || h.windInfo.direction === 'S') ? h.windGusts : 0;
+  }));
+
+  const surCriticalHour = hours.find(h => {
+    const windType = getWindType(h.windDirection);
+    return (windType.type === 'SUR' || h.windInfo.direction === 'S') && h.windGusts === surMaxGust;
+  });
+
   const criticalHours = hours.filter(hour => 
-    hour.isDangerous || hour.precipitation > 2 || getWindType(hour.windDirection).type === 'ZONDA'
+    hour.isDangerous || 
+    hour.precipitation > 2 || 
+    getWindType(hour.windDirection).type === 'ZONDA'
   );
 
+  // Agregar la hora crítica del viento Sur si existe
+  if (surCriticalHour && surMaxGust > 40) { // Solo mostrar si es significativo
+    criticalHours.push({
+      ...surCriticalHour,
+      isSurMax: true // Nueva propiedad para identificar
+    });
+  }
+
   return (
-    <div className="mt-6 w-full">
-      <h4 className="text-gray-800 font-semibold mb-3 text-lg">Horas importantes:</h4>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full">
+    <div className="mt-4 sm:mt-6">
+      <h4 className="text-gray-800 font-semibold mb-2 sm:mb-3 text-base sm:text-lg">
+        Horas importantes:
+      </h4>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
         {criticalHours.map((hour, i) => {
           const windType = getWindType(hour.windDirection);
+          
           return (
             <div 
               key={i} 
-              className={`p-4 rounded-xl border-2 w-full ${
+              className={`p-3 sm:p-4 rounded-lg sm:rounded-xl border-2 ${
                 hour.isDangerous 
                   ? 'bg-red-500/20 border-red-300' 
+                  : hour.isSurMax
+                  ? 'bg-purple-500/20 border-purple-300'
                   : windType.type === 'ZONDA'
                   ? 'bg-orange-500/20 border-orange-300'
                   : 'bg-blue-500/20 border-blue-300'
               }`}
             >
-              <p className="text-gray-800 font-bold text-sm">
+              <p className="text-gray-800 font-bold text-xs sm:text-sm">
                 {hour.hour}:00 hs -{' '}
                 {hour.isDangerous 
                   ? `VIENTO FUERTE: ${hour.windGusts} km/h`
+                  : hour.isSurMax
+                  ? `SUR MÁXIMO: ${hour.windGusts} km/h ⬇️`
                   : windType.type === 'ZONDA'
-                  ? `ZONDA: ${hour.windGusts} km/h ${windType.emoji}`
+                  ? `ZONDA: ${hour.windGusts} km/h 🌪️`
                   : `Lluvia: ${hour.precipitation} mm`
                 }
               </p>
-              <p className="text-gray-600 text-xs mt-2">
+              <p className="text-gray-600 text-xs mt-1 sm:mt-2">
                 Dirección: {hour.windInfo.direction} {hour.windInfo.arrow} • {windType.description}
+                {hour.isSurMax && " • Racha máxima del día"}
               </p>
             </div>
           );
         })}
         {criticalHours.length === 0 && (
-          <div className="p-4 text-center bg-green-500/20 rounded-xl border border-green-300 w-full">
-            <p className="text-green-700 font-medium">No se esperan condiciones críticas</p>
+          <div className="p-3 sm:p-4 text-center bg-green-500/20 rounded-lg sm:rounded-xl border border-green-300">
+            <p className="text-green-700 font-medium text-sm sm:text-base">
+              No se esperan condiciones críticas
+            </p>
           </div>
         )}
       </div>
