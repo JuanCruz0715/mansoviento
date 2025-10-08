@@ -1,3 +1,16 @@
+// Exportar getWindDirection desde aquí también
+export const getWindDirection = (degrees) => {
+  if (degrees >= 337.5 || degrees < 22.5) return { direction: 'N', arrow: '⬆️' };
+  if (degrees >= 22.5 && degrees < 67.5) return { direction: 'NE', arrow: '↗️' };
+  if (degrees >= 67.5 && degrees < 112.5) return { direction: 'E', arrow: '➡️' };
+  if (degrees >= 112.5 && degrees < 157.5) return { direction: 'SE', arrow: '↘️' };
+  if (degrees >= 157.5 && degrees < 202.5) return { direction: 'S', arrow: '⬇️' };
+  if (degrees >= 202.5 && degrees < 247.5) return { direction: 'SW', arrow: '↙️' };
+  if (degrees >= 247.5 && degrees < 292.5) return { direction: 'W', arrow: '⬅️' };
+  if (degrees >= 292.5 && degrees < 337.5) return { direction: 'NW', arrow: '↖️' };
+  return { direction: '-', arrow: '' };
+};
+
 export const getWindType = (degrees) => {
   if (degrees >= 270 && degrees < 330) {
     return { type: 'ZONDA', emoji: '🌡️', description: 'Viento cálido y seco del Oeste/Noroeste', color: 'text-orange-600' };
