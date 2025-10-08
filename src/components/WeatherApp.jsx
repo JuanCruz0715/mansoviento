@@ -27,6 +27,23 @@ export default function WeatherApp() {
   return (
     <div className="min-h-screen relative">
       <AnimatedSky />
+{/* Header minimalista */}
+<div className="relative z-20">
+  <div className="max-w-6xl mx-auto px-4 py-4">
+    <div className="text-center">
+      <p className="text-gray-600 text-sm">
+        Desarrollado por <span className="font-semibold">[Juan Cruz Reinoso]</span> • 
+        Datos de {' '}
+        <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+          OpenWeather
+        </a> y {' '}
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+          Open-Meteo
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
       
       <div className="relative z-10 p-3 sm:p-4 md:p-6">
         <div className="max-w-6xl mx-auto">
@@ -41,6 +58,7 @@ export default function WeatherApp() {
           
           {/* Pronóstico */}
           <WeatherForecast hourlyForecast={hourlyForecast} />
+          
         </div>
       </div>
     </div>
