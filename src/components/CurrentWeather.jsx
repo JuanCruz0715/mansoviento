@@ -1,6 +1,6 @@
 import { Thermometer, Wind, CloudRain, Navigation, MapPin, Eye } from 'lucide-react';
 
-export const CurrentWeather = ({ currentWeather, getWindDirection }) => {
+export const CurrentWeather = ({ currentWeather, getWindDirection, customLocation }) => {
   if (!currentWeather) return null;
 
   const metrics = [
@@ -43,7 +43,9 @@ export const CurrentWeather = ({ currentWeather, getWindDirection }) => {
       <div className="text-center mb-6">
         <div className="flex items-center justify-center gap-2 mb-2">
           <MapPin className="w-5 h-5 text-gray-600" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">San Juan, Argentina</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            {customLocation?.name || 'San Juan, Argentina'}
+          </h1>
         </div>
         <div className="flex items-center justify-center gap-4">
           <div className="text-5xl sm:text-6xl font-bold text-gray-800">

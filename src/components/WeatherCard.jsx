@@ -8,9 +8,8 @@ export default function WeatherCard({
 }) {
   return (
     <div
-      className={`bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-lg
-        border border-white/30 transition-all duration-300
-        hover:bg-white/25 ${className}`}
+      className={`bg-white/30 rounded-2xl p-4 shadow-lg border border-white/40 
+        transition-all duration-300 hover:bg-white/40 ${className}`}
     >
       <div className="flex items-center gap-2 mb-3">
         <Icon className="w-5 h-5 text-white" />

@@ -9,13 +9,15 @@ export const WeatherForecast = ({ hourlyForecast }) => {
   if (!hourlyForecast) return null;
 
   return (
-    <div className="glass-effect rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 border border-white/30 w-full">
+    <div className="glass-effect rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 border border-white/30 w-full"
+  >
       <div className="flex items-center gap-3 mb-6">
         <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
           Pronóstico {hourlyForecast.length} Días
         </h2>
-      </div>
+      </div >
+      
 
       <DayTabs days={hourlyForecast} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
       <DayDetails day={hourlyForecast[selectedDay]} />
@@ -42,8 +44,8 @@ const DayTabs = ({ days, selectedDay, onSelectDay }) => {
   };
 
   return (
-    <div className="w-full mb-6">
-      <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-4 scrollbar-hide w-full">
+    <div className="w-full mb-6 -mx-2 px-2">
+      <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-4 scrollbar-hide w-full px-2">
         {days.map((day, index) => {
           const summary = getDaySummary(day);
           const dayName = getDayName(day.date, index);
@@ -58,7 +60,7 @@ const DayTabs = ({ days, selectedDay, onSelectDay }) => {
                   ? 'bg-yellow-500/30 border-yellow-400 shadow-lg scale-105'
                   : 'bg-white/50 border-white/40 hover:bg-white/70 hover:shadow-md'
               }`}
-              style={{ minWidth: '120px' }} // Fuerza un ancho mínimo
+              style={{ minWidth: '140px' }} // Fuerza un ancho mínimo
             >
               <div className="text-center space-y-2 w-full">
                 {/* Nombre del día */}
@@ -164,11 +166,19 @@ const CriticalHours = ({ hours }) => {
     return (windType.type === 'SUR' || h.windInfo.direction === 'S') && h.windGusts === surMaxGust;
   });
 
-  const criticalHours = hours.filter(hour => 
-    hour.isDangerous || 
-    hour.precipitation > 2 || 
-    getWindType(hour.windDirection).type === 'ZONDA'
-  );
+  const criticalHours = hours.filter(hour => {
+    const windType = getWindType(hour.windDirection);
+    
+    // Condiciones para mostrar en horarios importantes:
+    return (
+      // Viento peligroso (siempre mostrar)
+      hour.isDangerous || 
+      // Lluvia significativa
+      hour.precipitation > 2 || 
+      // Zonda solo si supera 45 km/h
+      (windType.type === 'ZONDA' && hour.windGusts > 45)
+    );
+  });
 
   // Agregar la hora crítica del viento Sur si existe
   if (surCriticalHour && surMaxGust > 40) { // Solo mostrar si es significativo
@@ -181,7 +191,7 @@ const CriticalHours = ({ hours }) => {
   return (
     <div className="mt-4 sm:mt-6">
       <h4 className="text-gray-800 font-semibold mb-2 sm:mb-3 text-base sm:text-lg">
-        Horas importantes:
+        Horarios importantes:
       </h4>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
         {criticalHours.map((hour, i) => {
@@ -214,6 +224,7 @@ const CriticalHours = ({ hours }) => {
               <p className="text-gray-600 text-xs mt-1 sm:mt-2">
                 Dirección: {hour.windInfo.direction} {hour.windInfo.arrow} • {windType.description}
                 {hour.isSurMax && " • Racha máxima del día"}
+                {windType.type === 'ZONDA' && " • Viento Zonda"}
               </p>
             </div>
           );

@@ -85,34 +85,42 @@ export const useWeather = (customLocation = { lat: -31.5375, lng: -68.5364 }) =>
 
   const fetchAllWeatherData = async (location = customLocation) => {
     try {
+      console.log('📍 Fetching weather for:', location.name, location.lat, location.lng);
+      
       const [currentResponse, forecastResponse] = await Promise.all([
         fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${location.lat}&lon=${location.lng}&appid=${API_KEY}&units=metric&lang=es`),
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lng}&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,precipitation_probability,weather_code&timezone=auto&forecast_days=7`)
       ]);
+
+      if (!currentResponse.ok || !forecastResponse.ok) {
+        throw new Error('Error en la respuesta de la API');
+      }
 
       const [currentData, forecastData] = await Promise.all([
         currentResponse.json(),
         forecastResponse.json()
       ]);
 
+      console.log('✅ Datos recibidos para:', location.name);
       setCurrentWeather(currentData);
       setHourlyForecast(processHourlyData(forecastData));
       setLoading(false);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching weather:', error);
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchAllWeatherData(customLocation);
-  }, [customLocation.lat, customLocation.lng]);
+  }, [customLocation.lat, customLocation.lng]); // Se ejecuta cuando cambian las coordenadas
 
   return { 
     currentWeather, 
     hourlyForecast, 
     loading, 
-    refetch: fetchAllWeatherData 
+    refetch: () => fetchAllWeatherData(customLocation) 
   };
 };
 
