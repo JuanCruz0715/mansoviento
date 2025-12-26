@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useWeather } from '../hooks/useWeather';
+import { useWeather, useWeatherAlerts } from '../hooks/useWeather';
 import { useSkyAnimation } from '../hooks/useSkyAnimation';
 import { getWindDirection } from '../utils/windUtils';
 import { AnimatedSky } from '../components/AnimatedSky';
 import { CurrentWeather } from '../components/CurrentWeather';
 import { WeatherForecast } from '../components/WeatherForecast';
 import { DepartmentsCarousel } from '../components/DepartmentsCarousel';
+import { NotificationManager } from '../components/notificationManager';
+import { WeatherAlerts } from '../components/WeatherAlerts';
 
 export default function WeatherApp() {
   const [selectedLocation, setSelectedLocation] = useState({
@@ -16,6 +18,7 @@ export default function WeatherApp() {
   });
   
   const { currentWeather, hourlyForecast, loading } = useWeather(selectedLocation);
+  const { alerts } = useWeatherAlerts(hourlyForecast);
   const sky = useSkyAnimation();
 
   const handleDepartmentSelect = (department) => {
@@ -67,6 +70,14 @@ export default function WeatherApp() {
             selectedDepartment={selectedLocation}
             onDepartmentSelect={handleDepartmentSelect}
           />
+          
+          {/* Alertas Climáticas Futuras */}
+          <WeatherAlerts alerts={alerts} />
+          
+          {/* Gestor de Notificaciones */}
+          <div className="mb-4">
+            <NotificationManager />
+          </div>
           
           {/* Clima actual */}
           <CurrentWeather 
