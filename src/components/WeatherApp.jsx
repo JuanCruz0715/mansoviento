@@ -6,7 +6,7 @@ import { AnimatedSky } from '../components/AnimatedSky';
 import { CurrentWeather } from '../components/CurrentWeather';
 import { WeatherForecast } from '../components/WeatherForecast';
 import { DepartmentsCarousel } from '../components/DepartmentsCarousel';
-import { NotificationManager } from '../components/notificationManager';
+import { NotificationManager } from '../components/NotificationManager';
 import { WeatherAlerts } from '../components/WeatherAlerts';
 
 export default function WeatherApp() {
