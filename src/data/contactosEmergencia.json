@@ -1,0 +1,6 @@
+{
+  "proteccionCivil": { "nombre": "Protección Civil San Juan", "tel": "103" },
+  "emergencias": { "nombre": "Emergencias", "tel": "911" },
+  "bomberos": { "nombre": "Bomberos", "tel": "100" },
+  "defensaCivil": { "nombre": "Defensa Civil", "tel": "103" }
+}

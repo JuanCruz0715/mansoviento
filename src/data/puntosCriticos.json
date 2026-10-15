@@ -1,0 +1,62 @@
+[
+  {
+    "id": "huaco",
+    "nombre": "Huaco - Jáchal",
+    "departamento": "Jáchal",
+    "lat": -30.2167,
+    "lng": -68.5167,
+    "radioMetros": 2000,
+    "nivelBase": "alto",
+    "descripcion": "Zona de crecida del río Jáchal. Evacuar hacia el este.",
+    "rutaEscape": "Ruta 150 hacia San José de Jáchal",
+    "elevacion": 1037
+  },
+  {
+    "id": "dique-soldano",
+    "nombre": "Dique Soldano - Zonda",
+    "departamento": "Zonda",
+    "lat": -31.5167,
+    "lng": -68.7,
+    "radioMetros": 3000,
+    "nivelBase": "alto",
+    "descripcion": "Posible desborde del dique. No cruzar rutas anegadas.",
+    "rutaEscape": "Ruta 12 hacia el este",
+    "elevacion": 769
+  },
+  {
+    "id": "bofinger",
+    "nombre": "Sistema Bofinger - Sarmiento",
+    "departamento": "Sarmiento",
+    "lat": -32.05,
+    "lng": -68.6667,
+    "radioMetros": 2500,
+    "nivelBase": "medio",
+    "descripcion": "Monitorear nivel del canal.",
+    "rutaEscape": "Ruta 20 hacia Media Agua",
+    "elevacion": 738
+  },
+  {
+    "id": "ullum",
+    "nombre": "Ullum - Piedemonte",
+    "departamento": "Ullum",
+    "lat": -31.45,
+    "lng": -68.75,
+    "radioMetros": 2500,
+    "nivelBase": "alto",
+    "descripcion": "Zona de aluviones por pendiente pronunciada.",
+    "rutaEscape": "Ruta 60 hacia el este",
+    "elevacion": 833
+  },
+  {
+    "id": "albardon",
+    "nombre": "Albardón - Zona baja",
+    "departamento": "Albardón",
+    "lat": -31.4333,
+    "lng": -68.5167,
+    "radioMetros": 2000,
+    "nivelBase": "medio",
+    "descripcion": "Área de acumulación de agua en temporada de lluvias.",
+    "rutaEscape": "Ruta 40 hacia el norte",
+    "elevacion": 636
+  }
+]

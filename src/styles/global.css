@@ -61,3 +61,17 @@ html {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* Filtro dark para el mapa base de OpenStreetMap */
+.mapa-dark-filtro {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.7);
+}
+/* Filtro dark para el mapa base de OpenStreetMap */
+.mapa-dark-filtro {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.7);
+}
+
+/* Filtro para intensificar las capas WMS del Geoportal San Juan */
+.wms-hidrografia {
+    filter: brightness(2.5) saturate(4) contrast(1.5);
+}

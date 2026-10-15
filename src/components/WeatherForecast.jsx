@@ -1,219 +1,133 @@
 import { useState } from 'react';
-import {
-  Calendar,
-  AlertTriangle,
-  Wind,
-  Thermometer,
-  CloudRain,
-  Navigation
-} from 'lucide-react';
+import { Calendar, AlertTriangle } from 'lucide-react';
 
 import WeatherHourlyGrid from './WeatherHourlyGrid';
-import { getDaySummary, getWindType } from '../utils/windUtils';
+import { getWindType } from '../utils/windUtils';
 
 export const WeatherForecast = ({ hourlyForecast }) => {
   const [selectedDay, setSelectedDay] = useState(0);
 
-  if (!hourlyForecast) return null;
+  if (!hourlyForecast || hourlyForecast.length === 0) return null;
+
+  const day = hourlyForecast[selectedDay];
 
   return (
-    <div className="glass-effect overflow-x-visible rounded-xl sm:rounded-2xl lg:rounded-3xl p-4 sm:p-6 border border-white/30 w-full">
-
+    <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/20 p-5 sm:p-6">
 
       {/* HEADER */}
-      <div className="flex items-center gap-3 mb-6">
-        <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-gray-800" />
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
-          Pronóstico {hourlyForecast.length} días
-        </h2>
+      <div className="flex items-center gap-2 mb-5">
+        <Calendar className="w-4 h-4 text-cyan-400" strokeWidth={1.5} />
+        <h3 className="text-sm font-medium text-white/80 uppercase tracking-wider">
+          Pronóstico · 7 días
+        </h3>
       </div>
 
-      {/* TABS DE DÍAS */}
-      <DayTabs
+      {/* GRILLA HORARIA DEL DÍA SELECCIONADO */}
+      <div className="mb-4">
+        <WeatherHourlyGrid day={day} />
+      </div>
+
+      {/* DOTS DE NAVEGACIÓN (estilo Instagram) */}
+      <DayDots
         days={hourlyForecast}
         selectedDay={selectedDay}
         onSelectDay={setSelectedDay}
       />
 
-      {/* DETALLE DEL DÍA SELECCIONADO */}
-      <DayDetails day={hourlyForecast[selectedDay]} />
+      {/* HORAS CRÍTICAS */}
+      <div className="mt-5">
+        <CriticalHours hours={day.hours} />
+      </div>
+
     </div>
   );
 };
 
 /* ===========================
-   TABS DE DÍAS
+   DOTS DE NAVEGACIÓN
 =========================== */
 
-const DayTabs = ({ days, selectedDay, onSelectDay }) => {
-  const formatDate = (dateString) => {
-    const [, month, day] = dateString.split('-');
-    return `${day}/${month}`;
-  };
-
-  const getDayName = (dateString, index) => {
-    if (index === 0) return 'HOY';
+const DayDots = ({ days, selectedDay, onSelectDay }) => {
+  const getDayLabel = (dateString, index) => {
+    if (index === 0) return 'Hoy';
 
     const [year, month, day] = dateString.split('-');
     const date = new Date(year, month - 1, day);
-
     const name = date.toLocaleDateString('es-AR', { weekday: 'long' });
-    return name.charAt(0).toUpperCase() + name.slice(1, 4);
+    return name.charAt(0).toUpperCase() + name.slice(1);
   };
 
   return (
-  <div className="mb-6">
-    {/* MISMO ANCHO QUE DayDetails */}
-    <div className="max-w-6xl mx-auto px-2">
+    <div className="flex flex-col items-center gap-3 py-2">
+      {/* Dots más grandes y separados */}
+      <div className="flex items-center gap-2.5">
+        {days.map((day, index) => {
+          const isActive = selectedDay === index;
 
-      {/* SCROLL */}
-      <div className="overflow-x-auto">
-        <div className="flex gap-3 py-4 w-max mx-auto">
-
-          {days.map((day, index) => {
-            const summary = getDaySummary(day);
-
-            return (
-              <button
-                key={day.date}
-                onClick={() => onSelectDay(index)}
-                className={`min-w-[140px] p-3 rounded-xl border-2 transition-all will-change-transform ${
-                  selectedDay === index
-                    ? 'bg-yellow-500/30 border-yellow-400 shadow-lg scale-105'
-                    : 'bg-white/50 border-white/40 hover:bg-white/70'
-                }`}
-              >
-                <div className="text-center space-y-2">
-                  <p className="font-bold text-sm">
-                    {getDayName(day.date, index)}
-                  </p>
-
-                  <p className="text-gray-600 text-sm">
-                    {formatDate(day.date)}
-                  </p>
-
-                  <div className="flex justify-center gap-2">
-                    <span className="font-bold text-lg">
-                      {summary.tempMax}°
-                    </span>
-                    <span className="text-blue-600">
-                      {summary.tempMin}°
-                    </span>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-
-        </div>
-      </div>
-    </div>
-  </div>
-);
-}
-
-/* ===========================
-   DETALLE DEL DÍA
-=========================== */
-
-const DayDetails = ({ day }) => {
-  if (!day) return null;
-  const summary = getDaySummary(day);
-
-  return (
-    <div className="bg-white/60 rounded-xl p-4 sm:p-6 border border-white/40">
-
-      {/* RESUMEN */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <SummaryItem
-          icon={Thermometer}
-          label="Temp Máx/Mín"
-          value={`${summary.tempMax}° / ${summary.tempMin}°`}
-        />
-        <SummaryItem
-          icon={Wind}
-          label="Rachas Máx"
-          value={`${summary.maxWindGusts} km/h`}
-        />
-        <SummaryItem
-          icon={CloudRain}
-          label="Lluvia"
-          value={`${summary.totalPrecipitation.toFixed(1)} mm`}
-        />
-        <SummaryItem
-          icon={AlertTriangle}
-          label="Viento"
-          value={summary.hasDangerousWinds ? 'ALERTA' : 'NORMAL'}
-          color={summary.hasDangerousWinds ? 'text-red-600' : 'text-green-600'}
-        />
-        <SummaryItem
-          icon={Navigation}
-          label="Viento Pred."
-          value={`${summary.windArrow} ${summary.predominantWind}`}
-          subtext={summary.predominantWindType?.type}
-          color={summary.predominantWindType?.color}
-        />
+          return (
+            <button
+              key={day.date}
+              onClick={() => onSelectDay(index)}
+              className={`rounded-full transition-all duration-200 ${
+                isActive
+                  ? 'w-8 h-2.5 bg-cyan-400 shadow-lg shadow-cyan-400/50'
+                  : 'w-2.5 h-2.5 bg-white/25 hover:bg-white/50 hover:scale-110'
+              }`}
+              aria-label={`Día ${index + 1}`}
+            />
+          );
+        })}
       </div>
 
-      {/* TABLA HORARIA */}
-      <h4 className="text-gray-800 font-semibold mb-3 text-lg">
-        Pronóstico horario
-      </h4>
-
-      <WeatherHourlyGrid hourly={day.hours} />
-
-      {/* HORAS CRÍTICAS */}
-      <CriticalHours hours={day.hours} />
+      {/* Etiqueta del día activo más grande y visible */}
+      <p className="text-sm text-white/70 font-medium tracking-wide">
+        {getDayLabel(days[selectedDay].date, selectedDay)}
+      </p>
     </div>
   );
 };
 
 /* ===========================
-   COMPONENTES AUX
+   HORAS CRÍTICAS
 =========================== */
 
-const SummaryItem = ({ icon: Icon, label, value, subtext, color = 'text-gray-800' }) => (
-  <div className="text-center p-3 rounded-lg bg-white/50">
-    <Icon className="w-5 h-5 text-gray-700 mx-auto mb-2" />
-    <p className={`text-lg font-bold ${color}`}>{value}</p>
-    <p className="text-gray-600 text-sm">{label}</p>
-    {subtext && <p className={`text-xs mt-1 ${color}`}>{subtext}</p>}
-  </div>
-);
-
 const CriticalHours = ({ hours }) => {
-  const critical = hours.filter(h =>
-    h.isDangerous ||
-    h.precipitation > 2 ||
-    (getWindType(h.windDirection).type === 'ZONDA' && h.windGusts > 45)
+  const critical = hours.filter(
+    (h) =>
+      h.isDangerous ||
+      h.precipitation > 2 ||
+      (getWindType(h.windDirection).type === 'ZONDA' && h.windGusts > 45)
   );
 
   if (critical.length === 0) {
     return (
-      <div className="mt-6 p-4 text-center bg-green-500/20 rounded-xl">
-        <p className="text-green-700 font-medium">
-          No se esperan condiciones críticas
+      <div className="p-4 text-center bg-emerald-500/10 border border-emerald-400/30 rounded-2xl">
+        <p className="text-emerald-300 font-medium text-sm">
+          ✅ No se esperan condiciones críticas este día
         </p>
       </div>
     );
   }
 
   return (
-    <div className="mt-6">
-      <h4 className="font-semibold mb-3 text-gray-800">
-        Horarios importantes
-      </h4>
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <AlertTriangle className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+        <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-medium">
+          Horarios importantes
+        </h4>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {critical.map((h, i) => (
           <div
             key={i}
-            className="p-4 rounded-xl border bg-blue-500/20 border-blue-300"
+            className="p-3 rounded-xl bg-amber-500/10 border border-amber-400/30"
           >
-            <p className="font-bold text-sm">
-              {h.hour}:00 hs – {h.windGusts} km/h
+            <p className="font-semibold text-sm text-white">
+              {h.hour}:00 hs · {h.windGusts} km/h
             </p>
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-white/60 mt-1">
               Dirección: {h.windInfo.direction} {h.windInfo.arrow}
             </p>
           </div>

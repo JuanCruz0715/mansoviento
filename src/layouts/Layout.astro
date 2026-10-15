@@ -1,5 +1,15 @@
 ---
-// Elimina cualquier import de layout
+import '../styles/global.css';
+import Disclaimer from '../components/Disclaimer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'Manso Viento · Clima San Juan',
+  description = 'Clima en tiempo real y riesgo hídrico de San Juan, Argentina',
+} = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -7,21 +17,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Clima en tiempo real de San Juan, Argentina">
-  <title>Clima San Juan - Argentina</title>
+  <meta name="description" content={description}>
+  <title>{title}</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #2563eb 100%);
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-  </style>
 </head>
-<body>
-  <WeatherApp client:load />
+<body class="bg-slate-950 min-h-screen text-white antialiased">
+
+  <slot />
+
+  <footer class="relative z-10 max-w-5xl mx-auto px-4 py-6 pb-12">
+    <Disclaimer variant="inline" />
+  </footer>
+
 </body>
 </html>

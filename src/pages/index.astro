@@ -1,18 +1,105 @@
 ---
+import Layout from '../layouts/Layout.astro';
 import WeatherApp from '../components/WeatherApp';
-import '../styles/global.css';
+import puntosCriticos from '../data/puntosCriticos.json';
+import { nivelPuntoPorLluvia, nivelGlobalPorLluvia } from '../utils/riskUtils.js';
+
+// Departamentos de San Juan
+const DEPARTMENTS = [
+  { id: 'capital', lat: -31.5375, lng: -68.5364 },
+  { id: 'rawson', lat: -31.6667, lng: -68.4667 },
+  { id: 'rivadavia', lat: -31.5333, lng: -68.6000 },
+  { id: 'santa_lucia', lat: -31.5333, lng: -68.4833 },
+  { id: 'chimbas', lat: -31.4833, lng: -68.5333 },
+  { id: 'pocito', lat: -31.6833, lng: -68.5833 },
+  { id: 'caucete', lat: -31.6500, lng: -68.2833 },
+  { id: 'jachal', lat: -30.2500, lng: -68.7500 },
+  { id: 'albardon', lat: -31.4333, lng: -68.5333 },
+  { id: 'angaco', lat: -31.2000, lng: -68.1333 },
+  { id: 'iglesia', lat: -30.3667, lng: -69.3667 },
+  { id: 'ullum', lat: -31.0000, lng: -68.7167 },
+  { id: 'zonda', lat: -31.5526, lng: -68.7152 },
+  { id: 'calingasta', lat: -31.3333, lng: -69.4167 },
+  { id: 'sarmiento', lat: -32.0667, lng: -68.5333 },
+  { id: '25_de_mayo', lat: -31.6667, lng: -68.2333 },
+  { id: '9_de_julio', lat: -31.6507, lng: -68.3899 },
+  { id: 'valle_fertil', lat: -30.6333, lng: -67.4667 },
+  { id: 'san_martin', lat: -31.5000, lng: -68.3667 },
+];
+
+// Distancia Haversine
+function distanciaMetros(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+const latitudes = DEPARTMENTS.map(d => d.lat).join(',');
+const longitudes = DEPARTMENTS.map(d => d.lng).join(',');
+
+let nivelesPorDepartamento = {};
+let errorClima = false;
+
+try {
+  const res = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitudes}&longitude=${longitudes}&daily=precipitation_sum&timezone=America%2FArgentina%2FSan_Juan&forecast_days=1`,
+    { signal: AbortSignal.timeout(5000) }
+  );
+
+  if (res.ok) {
+    const data = await res.json();
+    const resultados = Array.isArray(data) ? data : [data];
+
+    DEPARTMENTS.forEach((dept, i) => {
+      const lluviaHoy = resultados[i]?.daily?.precipitation_sum?.[0] ?? 0;
+
+      const puntosCercanos = puntosCriticos.filter(p =>
+        distanciaMetros(dept.lat, dept.lng, p.lat, p.lng) <= 10000
+      );
+
+      const nivelBase = puntosCercanos.length > 0
+        ? puntosCercanos.reduce((max, p) => {
+            const orden = { bajo: 1, medio: 2, alto: 3 };
+            return orden[p.nivelBase] > orden[max] ? p.nivelBase : max;
+          }, 'bajo')
+        : 'bajo';
+
+      const nivelGlobal = nivelGlobalPorLluvia(lluviaHoy);
+
+      let nivelFinal;
+      if (lluviaHoy < 5) {
+        nivelFinal = 'verde';
+      } else if (lluviaHoy < 15) {
+        nivelFinal = nivelBase === 'alto' ? 'amarillo' : 'verde';
+      } else {
+        nivelFinal = nivelPuntoPorLluvia({ nivelBase }, nivelGlobal);
+      }
+
+      nivelesPorDepartamento[dept.id] = nivelFinal;
+    });
+  } else {
+    errorClima = true;
+  }
+} catch (e) {
+  errorClima = true;
+}
+
+if (errorClima) {
+  DEPARTMENTS.forEach(d => {
+    nivelesPorDepartamento[d.id] = 'verde';
+  });
+}
 ---
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Clima en tiempo real de San Juan, Argentina">
-  <title>Clima San Juan - Argentina</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-</head>
-<body class="bg-gradient-to-br from-blue-400 to-blue-600 min-h-screen">
-  <WeatherApp client:load />
-</body>
-</html>
+<Layout title="Manso Viento · Clima San Juan">
+  <WeatherApp
+    client:load
+    nivelesPorDepartamento={nivelesPorDepartamento}
+  />
+</Layout>

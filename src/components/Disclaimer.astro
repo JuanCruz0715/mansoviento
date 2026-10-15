@@ -1,0 +1,29 @@
+---
+// src/components/Disclaimer.astro
+interface Props {
+  variant?: 'inline' | 'banner';
+}
+const { variant = 'inline' } = Astro.props;
+---
+
+{variant === 'banner' ? (
+  <div class="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 mb-6 shadow-sm">
+    <div class="flex items-start gap-3">
+      <span class="text-2xl leading-none">⚠️</span>
+      <div class="text-sm text-amber-900">
+        <strong class="block mb-1">Herramienta complementaria, no oficial</strong>
+        <p>
+          Esta app es un proyecto ciudadano. <strong>No reemplaza las alertas de Protección Civil ni del Gobierno de San Juan.</strong>{' '}
+          En una emergencia real, seguí siempre las instrucciones de las autoridades y llamá al <a href="tel:103" class="font-bold underline">103</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+) : (
+  <p class="text-xs text-gray-500 text-center mt-6 leading-relaxed">
+    Herramienta complementaria no oficial. Los niveles de riesgo son estimaciones basadas en datos públicos de{' '}
+    <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" class="underline">Open-Meteo</a>{' '}
+    y puntos críticos identificados por el Comité de Crisis de San Juan.{' '}
+    <strong>No reemplaza la información oficial de Protección Civil (103).</strong>
+  </p>
+)}

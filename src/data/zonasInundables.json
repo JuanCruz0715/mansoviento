@@ -1,0 +1,112 @@
+[
+  {
+    "id": "la-rinconada",
+    "nombre": "La Rinconada - Pocito",
+    "departamento": "Pocito",
+    "lat": -31.7167,
+    "lng": -68.5833,
+    "radioMetros": 3000,
+    "umbralLluviaMm": 40,
+    "descripcion": "Zona de aluviones históricos. Con más de 40mm se activan los abanicos aluviales de la Sierra Chica de Zonda.",
+    "fuente": "Estudio CONICET/INTA Pocito"
+  },
+  {
+    "id": "villa-nueva-calingasta",
+    "nombre": "Villa Nueva - Calingasta",
+    "departamento": "Calingasta",
+    "lat": -31.3333,
+    "lng": -69.4167,
+    "radioMetros": 4000,
+    "umbralLluviaMm": 35,
+    "descripcion": "Crecientes del río Castaño. El deshielo cordillerano suma caudal base y las lluvias estivales generan desbordes.",
+    "fuente": "Estudio CONICET Río Castaño"
+  },
+  {
+    "id": "capital-centro",
+    "nombre": "Capital - Microcentro",
+    "departamento": "Capital",
+    "lat": -31.5375,
+    "lng": -68.5364,
+    "radioMetros": 2000,
+    "umbralLluviaMm": 25,
+    "descripcion": "El agua ingresa desde Chimbas y Rivadavia por Ignacio de la Roza, calle Salta y Av. Libertador. El sistema de desagüe colapsa con lluvias intensas.",
+    "fuente": "Municipalidad de Capital"
+  },
+  {
+    "id": "conector-sur",
+    "nombre": "Conector Sur - Capital",
+    "departamento": "Capital",
+    "lat": -31.5500,
+    "lng": -68.5333,
+    "radioMetros": 1500,
+    "umbralLluviaMm": 20,
+    "descripcion": "La vía rápida obstruye los desagües naturales. Zona crítica de acumulación.",
+    "fuente": "Municipalidad de Capital"
+  },
+  {
+    "id": "entre-rios-pedro-maipu",
+    "nombre": "Calle Entre Ríos (Pedro y Maipú)",
+    "departamento": "Capital",
+    "lat": -31.5333,
+    "lng": -68.5167,
+    "radioMetros": 500,
+    "umbralLluviaMm": 20,
+    "descripcion": "Punto de anegamiento crónico. El agua se estanca varias horas después de la lluvia.",
+    "fuente": "Vecinos de Capital"
+  },
+  {
+    "id": "villa-del-pino",
+    "nombre": "Villa del Pino - Capital",
+    "departamento": "Capital",
+    "lat": -31.5500,
+    "lng": -68.5500,
+    "radioMetros": 1200,
+    "umbralLluviaMm": 25,
+    "descripcion": "Punto de confluencia de los conductos pluviales. Descarga en Circunvalación.",
+    "fuente": "Municipalidad de Capital"
+  },
+  {
+    "id": "huaco-jachal",
+    "nombre": "Huaco - Jáchal",
+    "departamento": "Jáchal",
+    "lat": -30.2167,
+    "lng": -68.5167,
+    "radioMetros": 2000,
+    "umbralLluviaMm": 30,
+    "descripcion": "Sobre el abanico aluvial del río Jáchal. Cauces al norte y sur. Punto crítico del Comité de Crisis.",
+    "fuente": "Comité de Crisis San Juan"
+  },
+  {
+    "id": "barreal-calingasta",
+    "nombre": "Barreal - Calingasta",
+    "departamento": "Calingasta",
+    "lat": -31.6500,
+    "lng": -69.4667,
+    "radioMetros": 3000,
+    "umbralLluviaMm": 30,
+    "descripcion": "Localidad que 'preocupa mucho' según Protección Civil. Zona de crecidas del río Los Patos.",
+    "fuente": "Protección Civil San Juan"
+  },
+  {
+    "id": "valle-fertil",
+    "nombre": "Valle Fértil",
+    "departamento": "Valle Fértil",
+    "lat": -30.6333,
+    "lng": -67.4667,
+    "radioMetros": 5000,
+    "umbralLluviaMm": 35,
+    "descripcion": "Zona que puede quedar aislada. Prioritario en el mapa de riesgo provincial.",
+    "fuente": "Comité de Crisis San Juan"
+  },
+  {
+    "id": "25-de-mayo",
+    "nombre": "25 de Mayo",
+    "departamento": "25 de Mayo",
+    "lat": -31.6667,
+    "lng": -68.2333,
+    "radioMetros": 4000,
+    "umbralLluviaMm": 30,
+    "descripcion": "Departamento prioritario en evacuación según Protección Civil.",
+    "fuente": "Protección Civil San Juan"
+  }
+]

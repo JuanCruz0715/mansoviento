@@ -20,10 +20,38 @@ const DEPARTMENTS = [
   { id: '25_de_mayo', name: '25 de Mayo', lat: -31.6667, lng: -68.2333 },
   { id: '9_de_julio', name: '9 de Julio', lat: -31.6507, lng: -68.3899 },
   { id: 'valle_fertil', name: 'Valle Fértil', lat: -30.6333, lng: -67.4667 },
-  { id: 'san_martin', name: 'San Martín', lat: -31.5000, lng: -68.3667 }
+  { id: 'san_martin', name: 'San Martín', lat: -31.5000, lng: -68.3667 },
 ];
 
-export const DepartmentsCarousel = ({ selectedDepartment, onDepartmentSelect }) => {
+// Mapa de colores por nivel de riesgo
+const RIESGO_STYLES = {
+  verde: {
+    dot: 'bg-emerald-400',
+    label: 'text-emerald-400',
+    text: 'Sin riesgo',
+  },
+  amarillo: {
+    dot: 'bg-amber-400',
+    label: 'text-amber-400',
+    text: 'Precaución',
+  },
+  naranja: {
+    dot: 'bg-orange-400',
+    label: 'text-orange-400',
+    text: 'Alto',
+  },
+  rojo: {
+    dot: 'bg-red-500 animate-pulse',
+    label: 'text-red-400',
+    text: 'Peligro',
+  },
+};
+
+export const DepartmentsCarousel = ({
+  selectedDepartment,
+  onDepartmentSelect,
+  nivelesPorDepartamento = {},
+}) => {
   const scrollContainerRef = useRef(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -34,7 +62,7 @@ export const DepartmentsCarousel = ({ selectedDepartment, onDepartmentSelect }) 
       const scrollAmount = 300;
       container.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   };
@@ -51,57 +79,85 @@ export const DepartmentsCarousel = ({ selectedDepartment, onDepartmentSelect }) 
 
   return (
     <div className="w-full mb-6 relative">
-      <div className="flex items-center gap-2 mb-3">
-        <MapPin className="w-5 h-5 text-gray-600" />
-        <h2 className="text-lg font-bold text-gray-800">Departamentos de San Juan</h2>
+      {/* Header de sección */}
+      <div className="flex items-center gap-2 mb-4 px-1">
+        <MapPin className="w-4 h-4 text-cyan-400" strokeWidth={1.5} />
+        <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider">
+          Departamentos de San Juan
+        </h2>
       </div>
-      
-      {/* Flechas de navegación MEJORADAS */}
-     {showLeftArrow && (
-  <button
-    onClick={() => scroll('left')}
-    className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/95 hover:bg-white rounded-full p-3 shadow-xl border border-gray-300 ml-1 transition-all duration-200 hover:scale-110 hover:shadow-2xl"
-    style={{ top: 'calc(44% + 20px)' }} // ← AQUÍ AJUSTÁ LA POSICIÓN VERTICAL
-  >
-    <ChevronLeft className="w-6 h-6 text-gray-800 font-bold" strokeWidth={2.5} />
-  </button>
-)}
 
-{showRightArrow && (
-  <button
-    onClick={() => scroll('right')}
-    className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white/95 hover:bg-white rounded-full p-3 shadow-xl border border-gray-300 mr-1 transition-all duration-200 hover:scale-110 hover:shadow-2xl"
-    style={{ top: 'calc(44% + 20px)' }} // ← AQUÍ AJUSTÁ LA POSICIÓN VERTICAL
-  >
-    <ChevronRight className="w-6 h-6 text-gray-800 font-bold" strokeWidth={2.5} />
-  </button>
-)}
+      {/* Flecha izquierda */}
+      {showLeftArrow && (
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10
+                     bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md
+                     rounded-full p-2.5 shadow-xl border border-white/20 ml-1
+                     transition-all duration-200 hover:scale-110"
+          style={{ top: 'calc(50% + 20px)' }}
+          aria-label="Desplazar a la izquierda"
+        >
+          <ChevronLeft className="w-5 h-5 text-white" strokeWidth={2} />
+        </button>
+      )}
 
-      {/* Contenedor del carrusel */}
-      <div 
+      {/* Flecha derecha */}
+      {showRightArrow && (
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10
+                     bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md
+                     rounded-full p-2.5 shadow-xl border border-white/20 mr-1
+                     transition-all duration-200 hover:scale-110"
+          style={{ top: 'calc(50% + 20px)' }}
+          aria-label="Desplazar a la derecha"
+        >
+          <ChevronRight className="w-5 h-5 text-white" strokeWidth={2} />
+        </button>
+      )}
+
+      {/* Carrusel */}
+      <div
         ref={scrollContainerRef}
         onScroll={checkScroll}
         className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 px-2 scroll-smooth"
-        style={{ 
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
-        }}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {DEPARTMENTS.map((dept) => (
-          <button
-            key={dept.id}
-            onClick={() => onDepartmentSelect(dept)}
-            className={`flex-shrink-0 px-4 py-3 rounded-xl border-2 transition-all duration-200 min-w-[140px] ${
-              selectedDepartment.id === dept.id
-                ? 'bg-orange-300 border-orange-300 text-black shadow-lg scale-105'
-                : 'bg-white/70 border-white/40 text-gray-800 hover:bg-white/90 hover:shadow-md hover:border-blue-200'
-            }`}
-          >
-            <div className="text-center whitespace-nowrap font-medium text-sm">
-              {dept.name}
-            </div>
-          </button>
-        ))}
+        {DEPARTMENTS.map((dept) => {
+          const isActive = selectedDepartment.id === dept.id;
+          const nivel = nivelesPorDepartamento[dept.id] || 'verde';
+          const riesgo = RIESGO_STYLES[nivel];
+
+          return (
+            <button
+              key={dept.id}
+              onClick={() => onDepartmentSelect(dept)}
+              className={`group relative flex-shrink-0 px-4 py-3 rounded-2xl border transition-all duration-200 min-w-[150px] text-left ${
+                isActive
+                  ? 'bg-white/15 border-cyan-400/50 shadow-lg shadow-cyan-400/10'
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+              }`}
+            >
+              {/* Nombre del departamento */}
+              <div
+                className={`whitespace-nowrap font-medium text-sm transition-colors ${
+                  isActive ? 'text-white' : 'text-white/80 group-hover:text-white'
+                }`}
+              >
+                {dept.name}
+              </div>
+
+              {/* Badge de riesgo */}
+              <div className="flex items-center gap-1.5 mt-2">
+                <span className={`w-1.5 h-1.5 rounded-full ${riesgo.dot}`} />
+                <span className={`text-[10px] uppercase tracking-wider font-medium ${riesgo.label}`}>
+                  {riesgo.text}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
