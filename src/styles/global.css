@@ -75,3 +75,11 @@ html {
 .wms-hidrografia {
     filter: brightness(2.5) saturate(4) contrast(1.5);
 }
+@keyframes pulse-riesgo {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse-riesgo 2s ease-in-out infinite;
+}

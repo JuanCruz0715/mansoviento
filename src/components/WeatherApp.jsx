@@ -10,6 +10,7 @@ import { CurrentWeather } from '../components/CurrentWeather';
 import { WeatherForecast } from '../components/WeatherForecast';
 import { DepartmentsCarousel } from '../components/DepartmentsCarousel';
 import { WeatherAlerts } from '../components/WeatherAlerts';
+import { AlertaInminente } from '../components/AlertaInminente';
 
 const RiskMap = lazy(() => import('../components/RiskMap'));
 
@@ -21,8 +22,16 @@ export default function WeatherApp({ nivelesPorDepartamento = {} }) {
     id: 'capital',
   });
 
+  // 🎯 NUEVO: Estado para compartir la ubicación del usuario
+  const [userLocation, setUserLocation] = useState(null);
+
   const { currentWeather, hourlyForecast, loading } = useWeather(selectedLocation);
   const { alerts } = useWeatherAlerts(hourlyForecast);
+
+  const lluviaHoy = hourlyForecast?.[0]?.hours?.reduce(
+    (sum, h) => sum + (h.precipitation || 0),
+    0
+  ) || 0;
 
   const handleDepartmentSelect = (department) => {
     setSelectedLocation({
@@ -48,177 +57,95 @@ export default function WeatherApp({ nivelesPorDepartamento = {} }) {
   return (
     <div className="min-h-screen relative">
       <StaticBackground />
-
       <TabsNav />
 
-      <div className="relative z-10 pt-20 pb-6 px-3 sm:px-4 md:px-6">
-        <div className="max-w-6xl mx-auto space-y-6">
-
-          {/* Carrusel de departamentos */}
-          <DepartmentsCarousel
-            selectedDepartment={selectedLocation}
-            onDepartmentSelect={handleDepartmentSelect}
-            nivelesPorDepartamento={nivelesPorDepartamento}
-          />
-
-          {/* Clima actual */}
-          <CurrentWeather
-            currentWeather={currentWeather}
-            getWindDirection={getWindDirection}
-            customLocation={selectedLocation}
-          />
-
-          {/* Alertas */}
-          <WeatherAlerts alerts={alerts} />
-
-          {/* Pronóstico 7 días */}
-          <WeatherForecast hourlyForecast={hourlyForecast} />
-
-          {/* Header del mapa */}
-          <div className="flex items-center gap-2 px-1 pt-4">
-            <span className="text-cyan-400 text-base">🗺️</span>
-            <h3 className="text-sm font-medium text-white/80 uppercase tracking-wider">
-              Mapa de riesgo hídrico
-            </h3>
-          </div>
-
-          {/* Mapa de riesgo */}
-          <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-2 shadow-2xl shadow-black/20 overflow-hidden">
-            <Suspense
-              fallback={
-                <div className="h-[60vh] flex items-center justify-center">
-                  <p className="text-white/50 text-sm">Cargando mapa...</p>
-                </div>
-              }
-            >
-              <RiskMap
-                puntos={puntosCriticos}
-                zonasInundables={zonasInundables}
-                nivelGlobal="verde"
+      <div className="relative z-10 pt-16 h-auto lg:h-[calc(100vh-64px)] lg:overflow-hidden">
+        <div className="h-full max-w-[1600px] mx-auto p-3 sm:p-4 md:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
+            
+            {/* 🟢 COLUMNA IZQUIERDA */}
+            <div className="lg:col-span-3 flex flex-col gap-4 lg:overflow-y-auto lg:pr-2 scrollbar-hide pb-4 lg:pb-0">
+              {/* Pasamos la función setUserLocation para que el banner actualice el mapa */}
+              <AlertaInminente onLocationFound={(loc) => setUserLocation(loc)} />
+              
+              <DepartmentsCarousel
+                selectedDepartment={selectedLocation}
+                onDepartmentSelect={handleDepartmentSelect}
+                nivelesPorDepartamento={nivelesPorDepartamento}
               />
-            </Suspense>
-          </div>
+              
+              <CurrentWeather
+                currentWeather={currentWeather}
+                getWindDirection={getWindDirection}
+                customLocation={selectedLocation}
+              />
+            </div>
 
-          {/* Leyenda del mapa */}
-          <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-5 shadow-2xl shadow-black/20">
-            <h3 className="text-sm font-medium text-white/80 uppercase tracking-wider mb-4">
-              📖 Leyenda del mapa
-            </h3>
+            {/* 🗺️ COLUMNA CENTRAL */}
+            <div className="lg:col-span-6 flex flex-col h-[60vh] lg:h-full gap-4">
+              <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-1 shadow-2xl shadow-black/20 flex-grow relative overflow-hidden">
+                <Suspense
+                  fallback={
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-white/50 text-sm">Cargando mapa...</p>
+                    </div>
+                  }
+                >
+                  {/* Le pasamos la ubicación compartida al mapa */}
+                  <RiskMap
+                    puntos={puntosCriticos}
+                    zonasInundables={zonasInundables}
+                    nivelGlobal="verde"
+                    lluviaHoy={lluviaHoy}
+                    height="100%"
+                    userLocation={userLocation}
+                  />
+                </Suspense>
+              </div>
 
-            {/* Niveles de riesgo */}
-            <div className="mb-5">
-              <p className="text-[10px] uppercase tracking-widest text-white/40 font-medium mb-2">
-                Niveles de riesgo
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-red-500/60 border-2 border-red-400 flex-shrink-0" />
-                  <span className="text-white/70">Alto</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-orange-500/60 border-2 border-orange-400 flex-shrink-0" />
-                  <span className="text-white/70">Moderado</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-amber-500/60 border-2 border-amber-400 flex-shrink-0" />
-                  <span className="text-white/70">Precaución</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full bg-emerald-500/60 border-2 border-emerald-400 flex-shrink-0" />
-                  <span className="text-white/70">Sin riesgo</span>
+              {/* Leyenda compacta */}
+              <div className="hidden lg:block rounded-2xl bg-white/5 border border-white/10 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-4 text-[10px] text-white/60">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-sky-400/20 border border-dashed border-sky-400" /> Informativo
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-amber-500/30 border border-amber-400" /> Precaución
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-red-500/30 border border-red-400 animate-pulse" /> Peligro
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-4 h-0.5 bg-cyan-400" /> Ríos
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-4 h-0.5 bg-blue-400" /> Canales
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Capas hidrográficas */}
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-white/40 font-medium mb-2">
-                Capas hidrográficas
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-
-                {/* Ríos oficiales */}
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-0.5 rounded-full bg-cyan-400 flex-shrink-0 mt-2" />
-                  <div>
-                    <p className="text-white/80">Ríos y arroyos</p>
-                    <p className="text-[10px] text-white/40">Cauce oficial · Geoportal SJ</p>
-                  </div>
+            {/* 🔵 COLUMNA DERECHA */}
+            <div className="lg:col-span-3 flex flex-col gap-4 lg:overflow-y-auto lg:pl-2 scrollbar-hide pb-4 lg:pb-0">
+              <WeatherAlerts alerts={alerts} />
+              <WeatherForecast hourlyForecast={hourlyForecast} />
+              
+              <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-4">
+                <h3 className="text-[10px] font-medium text-red-300 uppercase tracking-wider mb-3 flex items-center gap-1">
+                  🚨 Si tenés que evacuar
+                </h3>
+                <div className="flex flex-col gap-2">
+                  <a href="tel:103" className="text-sm font-medium text-white/70 hover:text-white transition-colors flex items-center gap-2">
+                    📞 Protección Civil: 103
+                  </a>
+                  <a href="tel:911" className="text-sm font-medium text-white/70 hover:text-white transition-colors flex items-center gap-2">
+                    📞 Emergencias: 911
+                  </a>
                 </div>
-
-                {/* Canales */}
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-0.5 rounded-full bg-blue-400 flex-shrink-0 mt-2" />
-                  <div>
-                    <p className="text-white/80">Canales de riego</p>
-                    <p className="text-[10px] text-white/40">Red de Hidráulica · pueden desbordar</p>
-                  </div>
-                </div>
-
-                {/* Cuencas */}
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-3 rounded-sm bg-violet-500/30 border border-violet-400 flex-shrink-0 mt-1" />
-                  <div>
-                    <p className="text-white/80">Cuencas tributarias</p>
-                    <p className="text-[10px] text-white/40">Zonas que drenan al río SJ</p>
-                  </div>
-                </div>
-
-                {/* Zonas inundables */}
-                <div className="flex items-start gap-3">
-                  <span className="w-4 h-4 rounded-full bg-sky-400/40 border-2 border-dashed border-sky-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-white/80">Zona inundable</p>
-                    <p className="text-[10px] text-white/40">Se activa con X mm de lluvia</p>
-                  </div>
-                </div>
-
-                {/* Radar de lluvia */}
-                <div className="flex items-start gap-3">
-                  <span className="w-4 h-4 rounded-sm bg-gradient-to-br from-blue-400/60 to-cyan-400/60 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-white/80">Radar de lluvia</p>
-                    <p className="text-[10px] text-white/40">Actualización cada 10 min</p>
-                  </div>
-                </div>
-
               </div>
             </div>
 
-            <p className="text-xs text-white/40 mt-4 leading-relaxed">
-              Los ríos, canales y cuencas son datos oficiales del Geoportal de San Juan (UNIDE).
-              El radar de lluvia se actualiza cada 10 minutos (fuente: RainViewer).
-            </p>
           </div>
-
-          {/* Panel de emergencia */}
-          <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-6">
-            <h3 className="text-sm font-medium text-white/80 uppercase tracking-wider mb-4">
-              🚨 Si tenés que evacuar
-            </h3>
-            <ol className="list-decimal list-inside space-y-2 text-white/70 text-sm mb-5">
-              <li>No cruces rutas ni calles con agua en movimiento.</li>
-              <li>Dirigite a la zona más alta y segura más cercana.</li>
-              <li>Cortá la luz y el gas antes de salir.</li>
-              <li>Llevá documentos, agua y medicamentos.</li>
-              <li>Avisá a un familiar o vecino hacia dónde vas.</li>
-            </ol>
-            <div className="flex flex-wrap gap-2">
-              <a
-                href="tel:103"
-                className="px-4 py-2 rounded-full bg-red-500/20 border border-red-400/40 text-red-200 text-sm font-medium hover:bg-red-500/30 transition-colors"
-              >
-                📞 Protección Civil: 103
-              </a>
-              <a
-                href="tel:911"
-                className="px-4 py-2 rounded-full bg-red-500/20 border border-red-400/40 text-red-200 text-sm font-medium hover:bg-red-500/30 transition-colors"
-              >
-                📞 Emergencias: 911
-              </a>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

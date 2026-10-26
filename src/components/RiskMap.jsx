@@ -64,6 +64,23 @@ function RainRadarLayer({ opacity = 0.6 }) {
 }
 
 /* ===========================
+   Componente para animar el "vuelo" del mapa
+=========================== */
+
+function FlyToLocation({ location }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (location) {
+      // flyTo hace una animación suave hacia la ubicación
+      map.flyTo([location.lat, location.lng], 13, { duration: 1.5 });
+    }
+  }, [location, map]);
+  
+  return null;
+}
+
+/* ===========================
    Estilos de popup
 =========================== */
 
@@ -96,12 +113,10 @@ const popupStyles = {
 };
 
 /* ===========================
-   Marcador de ubicación del usuario
+   Marcador de ubicación
 =========================== */
 
 function LocationMarker({ location, puntos }) {
-  const map = useMap();
-  map.setView([location.lat, location.lng], 13);
   const dentroDe = puntosCercanos(location.lat, location.lng, puntos);
 
   return (
@@ -145,12 +160,7 @@ function LocationMarker({ location, puntos }) {
       <Circle
         center={[location.lat, location.lng]}
         radius={location.accuracy}
-        pathOptions={{
-          color: '#3b82f6',
-          fillColor: '#3b82f6',
-          fillOpacity: 0.15,
-          weight: 1,
-        }}
+        pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.15, weight: 1 }}
       />
     </>
   );
@@ -160,13 +170,23 @@ function LocationMarker({ location, puntos }) {
    Componente principal
 =========================== */
 
-export default function RiskMap({ puntos, zonasInundables, nivelGlobal = 'verde' }) {
+export default function RiskMap({ 
+  puntos, 
+  zonasInundables, 
+  nivelGlobal = 'verde', 
+  lluviaHoy, 
+  height = '60vh', 
+  userLocation 
+}) {
   const { location, error, loading, getUserLocation } = useUserLocation();
 
-  return (
-    <div className="relative">
+  // Usamos la ubicación que viene del exterior (banner) o la del botón interno
+  const ubicacionFinal = userLocation || location;
 
-      {/* Botón de ubicación */}
+  return (
+    <div className="relative w-full h-full" style={{ height }}>
+      
+      {/* Botón de ubicación interno */}
       <button
         onClick={getUserLocation}
         disabled={loading}
@@ -185,10 +205,7 @@ export default function RiskMap({ puntos, zonasInundables, nivelGlobal = 'verde'
         </div>
       )}
 
-      <div
-        className="rounded-2xl overflow-hidden border border-white/10"
-        style={{ height: '60vh' }}
-      >
+      <div className="rounded-2xl overflow-hidden border border-white/10 w-full h-full">
         <MapContainer
           center={[-31.5375, -68.5364]}
           zoom={9}
@@ -196,7 +213,6 @@ export default function RiskMap({ puntos, zonasInundables, nivelGlobal = 'verde'
           style={{ height: '100%', width: '100%', zIndex: 0, background: '#0a0f1f' }}
           scrollWheelZoom={false}
         >
-          {/* ===== MAPA BASE: OpenStreetMap con filtro CSS oscuro ===== */}
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -205,7 +221,6 @@ export default function RiskMap({ puntos, zonasInundables, nivelGlobal = 'verde'
             opacity={0.9}
           />
 
-          {/* ===== CAPA 1: CUENCAS TRIBUTARIAS ===== */}
           <TileLayer
             url="https://unide.sanjuan.gob.ar/geoserver/wms"
             layers="unide_observ_ambiental_old:2a - Cuencas Tributarias Río San Juan"
@@ -218,7 +233,6 @@ export default function RiskMap({ puntos, zonasInundables, nivelGlobal = 'verde'
             attribution="Geoportal San Juan"
           />
 
-          {/* ===== CAPA 2: CANALES DE HIDRÁULICA ===== */}
           <TileLayer
             url="https://unide.sanjuan.gob.ar/geoserver/wms"
             layers="UNIDE_Hidraulica:Canales_Hidraulica"
@@ -231,7 +245,6 @@ export default function RiskMap({ puntos, zonasInundables, nivelGlobal = 'verde'
             attribution="Geoportal San Juan"
           />
 
-          {/* ===== CAPA 3: RÍOS DE SAN JUAN ===== */}
           <TileLayer
             url="https://unide.sanjuan.gob.ar/geoserver/wms"
             layers="unide:Rios_San_Juan"
@@ -244,88 +257,90 @@ export default function RiskMap({ puntos, zonasInundables, nivelGlobal = 'verde'
             attribution="Geoportal San Juan"
           />
 
-          {/* Radar de lluvia */}
           <RainRadarLayer opacity={0.6} />
 
-          {/* Zonas inundables */}
-          {zonasInundables?.map((z) => (
-            <Circle
-              key={z.id}
-              center={[z.lat, z.lng]}
-              radius={z.radioMetros}
-              pathOptions={{
-                color: '#38bdf8',
-                fillColor: '#38bdf8',
-                fillOpacity: 0.25,
-                weight: 2,
-                dashArray: '5, 5',
-              }}
-            >
-              <Popup>
-                <div style={{ minWidth: '220px' }}>
-                  <strong style={popupStyles.title}>{z.nombre}</strong>
-                  <span style={popupStyles.badge('#0ea5e9')}>Inundable</span>
+          {/* Zonas inundables dinámicas */}
+          {zonasInundables?.map((z) => {
+            let estado = 'informativo';
+            let color = '#38bdf8';
+            let peso = 2;
+            let dash = '5, 5';
 
-                  <p style={popupStyles.text}>{z.descripcion}</p>
-
-                  <p style={{ ...popupStyles.text, margin: '6px 0' }}>
-                    <span style={popupStyles.label}>⚠️ Se activa con:</span>{' '}
-                    {z.umbralLluviaMm} mm de lluvia
-                  </p>
-
-                  <p style={{ ...popupStyles.text, margin: '4px 0', fontSize: '11px', color: '#94a3b8' }}>
-                    Fuente: {z.fuente}
-                  </p>
-                </div>
-              </Popup>
-            </Circle>
-          ))}
-
-          {/* Puntos críticos */}
-          {puntos.map((p) => {
-            const nivelActual = nivelPuntoPorLluvia(p, nivelGlobal);
-            const color = coloresNivel[nivelActual];
+            if (lluviaHoy !== undefined) {
+              if (lluviaHoy >= z.umbralLluviaMm) {
+                estado = 'peligro'; color = '#dc2626'; peso = 3; dash = null;
+              } else if (lluviaHoy >= z.umbralLluviaMm * 0.5) {
+                estado = 'precaucion'; color = '#f59e0b'; peso = 2.5; dash = null;
+              }
+            }
 
             return (
               <Circle
-                key={p.id}
-                center={[p.lat, p.lng]}
-                radius={p.radioMetros}
-                pathOptions={{
-                  color,
-                  fillColor: color,
-                  fillOpacity: 0.4,
-                  weight: 2,
-                }}
+                key={z.id}
+                center={[z.lat, z.lng]}
+                radius={z.radioMetros}
+                pathOptions={{ color, fillColor: color, fillOpacity: estado === 'informativo' ? 0.15 : 0.3, weight: peso, dashArray: dash }}
               >
                 <Popup>
-                  <div style={{ minWidth: '200px' }}>
-                    <strong style={popupStyles.title}>{p.nombre}</strong>
-                    <span style={popupStyles.badge(color)}>{nivelActual}</span>
-
-                    <p style={popupStyles.text}>{p.descripcion}</p>
-
-                    <p style={popupStyles.text}>
-                      <span style={popupStyles.label}>Ruta:</span> {p.rutaEscape}
+                  <div style={{ minWidth: '220px' }}>
+                    <strong style={popupStyles.title}>{z.nombre}</strong>
+                    <span style={popupStyles.badge(color)}>
+                      {estado === 'peligro' ? 'PELIGRO' : estado === 'precaucion' ? 'PRECAUCIÓN' : 'INFORMATIVO'}
+                    </span>
+                    <p style={popupStyles.text}>{z.descripcion}</p>
+                    <p style={{ ...popupStyles.text, margin: '6px 0' }}>
+                      <span style={popupStyles.label}>⚠️ Umbral:</span> {z.umbralLluviaMm} mm
                     </p>
-
-                    {p.elevacion != null && (
-                      <p style={popupStyles.text}>
-                        📍 <span style={popupStyles.label}>Elevación:</span>{' '}
-                        {p.elevacion.toLocaleString('es-AR')} m
+                    {lluviaHoy !== undefined && (
+                      <p style={{ ...popupStyles.text, margin: '4px 0' }}>
+                        <span style={popupStyles.label}>Hoy:</span> {lluviaHoy.toFixed(1)} mm esperados
                       </p>
                     )}
-
-                    <a href="tel:103" style={popupStyles.button}>
-                      📞 Llamar al 103
-                    </a>
+                    <p style={{ ...popupStyles.text, margin: '4px 0', fontSize: '11px', color: '#94a3b8' }}>
+                      Fuente: {z.fuente}
+                    </p>
                   </div>
                 </Popup>
               </Circle>
             );
           })}
 
-          {location && <LocationMarker location={location} puntos={puntos} />}
+          {/* Puntos críticos */}
+          {puntos.map((p) => {
+            const nivelActual = nivelPuntoPorLluvia(p, nivelGlobal);
+            const color = coloresNivel[nivelActual];
+            return (
+              <Circle
+                key={p.id}
+                center={[p.lat, p.lng]}
+                radius={p.radioMetros}
+                pathOptions={{ color, fillColor: color, fillOpacity: 0.4, weight: 2 }}
+              >
+                <Popup>
+                  <div style={{ minWidth: '200px' }}>
+                    <strong style={popupStyles.title}>{p.nombre}</strong>
+                    <span style={popupStyles.badge(color)}>{nivelActual}</span>
+                    <p style={popupStyles.text}>{p.descripcion}</p>
+                    <p style={popupStyles.text}>
+                      <span style={popupStyles.label}>Ruta:</span> {p.rutaEscape}
+                    </p>
+                    {p.elevacion != null && (
+                      <p style={popupStyles.text}>
+                        📍 <span style={popupStyles.label}>Elevación:</span> {p.elevacion.toLocaleString('es-AR')} m
+                      </p>
+                    )}
+                    <a href="tel:103" style={popupStyles.button}>📞 Llamar al 103</a>
+                  </div>
+                </Popup>
+              </Circle>
+            );
+          })}
+
+          {/* Dispara la animación si hay ubicación externa */}
+          {ubicacionFinal && <FlyToLocation location={ubicacionFinal} />}
+
+          {/* Dibuja el marcador azul si hay ubicación */}
+          {ubicacionFinal && <LocationMarker location={ubicacionFinal} puntos={puntos} />}
         </MapContainer>
       </div>
     </div>

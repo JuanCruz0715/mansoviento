@@ -104,6 +104,14 @@ export const useWeather = (customLocation = { lat: -31.5375, lng: -68.5364 }) =>
   useEffect(() => {
     setLoading(true);
     fetchAllWeatherData(customLocation);
+
+    // 🔄 Refresco automático cada 10 minutos
+    const intervalId = setInterval(() => {
+      fetchAllWeatherData(customLocation);
+    }, 10 * 60 * 1000);
+
+    // Limpiar intervalo al desmontar o cambiar de ubicación
+    return () => clearInterval(intervalId);
   }, [customLocation.lat, customLocation.lng]);
 
   return {
