@@ -1,4 +1,4 @@
-import { MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 const DEPARTMENTS = [
@@ -23,28 +23,11 @@ const DEPARTMENTS = [
   { id: 'san_martin', name: 'San Martín', lat: -31.5000, lng: -68.3667 },
 ];
 
-// Mapa de colores por nivel de riesgo
 const RIESGO_STYLES = {
-  verde: {
-    dot: 'bg-emerald-400',
-    label: 'text-emerald-400',
-    text: 'Sin riesgo',
-  },
-  amarillo: {
-    dot: 'bg-amber-400',
-    label: 'text-amber-400',
-    text: 'Precaución',
-  },
-  naranja: {
-    dot: 'bg-orange-400',
-    label: 'text-orange-400',
-    text: 'Alto',
-  },
-  rojo: {
-    dot: 'bg-red-500 animate-pulse',
-    label: 'text-red-400',
-    text: 'Peligro',
-  },
+  verde: { dot: 'bg-emerald-500', label: 'text-emerald-500' },
+  amarillo: { dot: 'bg-amber-500', label: 'text-amber-500' },
+  naranja: { dot: 'bg-orange-500', label: 'text-orange-500' },
+  rojo: { dot: 'bg-red-500 animate-pulse', label: 'text-red-500' },
 };
 
 export const DepartmentsCarousel = ({
@@ -53,75 +36,21 @@ export const DepartmentsCarousel = ({
   nivelesPorDepartamento = {},
 }) => {
   const scrollContainerRef = useRef(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(true);
-
-  const scroll = (direction) => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      const scrollAmount = 300;
-      container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
-      });
-    }
-  };
-
-  const checkScroll = () => {
-    const container = scrollContainerRef.current;
-    if (container) {
-      setShowLeftArrow(container.scrollLeft > 0);
-      setShowRightArrow(
-        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
-      );
-    }
-  };
 
   return (
-    <div className="w-full mb-6 relative">
-      {/* Header de sección */}
-      <div className="flex items-center gap-2 mb-4 px-1">
-        <MapPin className="w-4 h-4 text-cyan-400" strokeWidth={1.5} />
-        <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider">
-          Departamentos de San Juan
+    <div className="w-full">
+      {/* Header del panel */}
+      <div className="flex items-center gap-2 mb-3">
+        <MapPin className="w-3.5 h-3.5 text-amber-500" strokeWidth={1.5} />
+        <h2 className="text-[10px] font-bold text-white/80 uppercase tracking-widest">
+          Departamentos
         </h2>
       </div>
 
-      {/* Flecha izquierda */}
-      {showLeftArrow && (
-        <button
-          onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10
-                     bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md
-                     rounded-full p-2.5 shadow-xl border border-white/20 ml-1
-                     transition-all duration-200 hover:scale-110"
-          style={{ top: 'calc(50% + 20px)' }}
-          aria-label="Desplazar a la izquierda"
-        >
-          <ChevronLeft className="w-5 h-5 text-white" strokeWidth={2} />
-        </button>
-      )}
-
-      {/* Flecha derecha */}
-      {showRightArrow && (
-        <button
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10
-                     bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md
-                     rounded-full p-2.5 shadow-xl border border-white/20 mr-1
-                     transition-all duration-200 hover:scale-110"
-          style={{ top: 'calc(50% + 20px)' }}
-          aria-label="Desplazar a la derecha"
-        >
-          <ChevronRight className="w-5 h-5 text-white" strokeWidth={2} />
-        </button>
-      )}
-
-      {/* Carrusel */}
+      {/* Lista vertical compacta */}
       <div
         ref={scrollContainerRef}
-        onScroll={checkScroll}
-        className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 px-2 scroll-smooth"
+        className="flex flex-col gap-1 overflow-y-auto max-h-[220px] scrollbar-hide pr-1"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {DEPARTMENTS.map((dept) => {
@@ -133,28 +62,19 @@ export const DepartmentsCarousel = ({
             <button
               key={dept.id}
               onClick={() => onDepartmentSelect(dept)}
-              className={`group relative flex-shrink-0 px-4 py-3 rounded-2xl border transition-all duration-200 min-w-[150px] text-left ${
+              className={`group relative w-full px-3 py-2 rounded-lg border transition-all duration-200 text-left flex justify-between items-center ${
                 isActive
-                  ? 'bg-white/15 border-cyan-400/50 shadow-lg shadow-cyan-400/10'
-                  : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20'
+                  ? 'bg-amber-500/10 border-amber-500/40'
+                  : 'bg-[#050505] border-white/5 hover:bg-white/5'
               }`}
             >
-              {/* Nombre del departamento */}
-              <div
-                className={`whitespace-nowrap font-medium text-sm transition-colors ${
-                  isActive ? 'text-white' : 'text-white/80 group-hover:text-white'
-                }`}
-              >
+              {/* Nombre */}
+              <span className={`text-xs font-medium ${isActive ? 'text-amber-400' : 'text-white/70'}`}>
                 {dept.name}
-              </div>
+              </span>
 
-              {/* Badge de riesgo */}
-              <div className="flex items-center gap-1.5 mt-2">
-                <span className={`w-1.5 h-1.5 rounded-full ${riesgo.dot}`} />
-                <span className={`text-[10px] uppercase tracking-wider font-medium ${riesgo.label}`}>
-                  {riesgo.text}
-                </span>
-              </div>
+              {/* Puntito de riesgo */}
+              <span className={`w-2 h-2 rounded-full ${riesgo.dot}`} />
             </button>
           );
         })}

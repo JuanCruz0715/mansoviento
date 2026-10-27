@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Calendar, AlertTriangle } from 'lucide-react';
-
+import { Calendar, AlertTriangle, Wind, Thermometer, CloudRain, Navigation } from 'lucide-react';
 import WeatherHourlyGrid from './WeatherHourlyGrid';
-import { getWindType } from '../utils/windUtils';
+import { getDaySummary, getWindType } from '../utils/windUtils';
 
 export const WeatherForecast = ({ hourlyForecast }) => {
   const [selectedDay, setSelectedDay] = useState(0);
@@ -12,12 +11,12 @@ export const WeatherForecast = ({ hourlyForecast }) => {
   const day = hourlyForecast[selectedDay];
 
   return (
-    <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/20 p-5 sm:p-6">
+    <div className="rounded-xl bg-[#0f0f11] border border-white/5 p-4 sm:p-5 shadow-xl">
 
       {/* HEADER */}
-      <div className="flex items-center gap-2 mb-5">
-        <Calendar className="w-4 h-4 text-cyan-400" strokeWidth={1.5} />
-        <h3 className="text-sm font-medium text-white/80 uppercase tracking-wider">
+      <div className="flex items-center gap-2 mb-5 pb-3 border-b border-white/5">
+        <Calendar className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
+        <h3 className="text-xs font-bold text-white/90 uppercase tracking-widest">
           Pronóstico · 7 días
         </h3>
       </div>
@@ -27,7 +26,7 @@ export const WeatherForecast = ({ hourlyForecast }) => {
         <WeatherHourlyGrid day={day} />
       </div>
 
-      {/* DOTS DE NAVEGACIÓN (estilo Instagram) */}
+      {/* DOTS DE NAVEGACIÓN */}
       <DayDots
         days={hourlyForecast}
         selectedDay={selectedDay}
@@ -50,7 +49,6 @@ export const WeatherForecast = ({ hourlyForecast }) => {
 const DayDots = ({ days, selectedDay, onSelectDay }) => {
   const getDayLabel = (dateString, index) => {
     if (index === 0) return 'Hoy';
-
     const [year, month, day] = dateString.split('-');
     const date = new Date(year, month - 1, day);
     const name = date.toLocaleDateString('es-AR', { weekday: 'long' });
@@ -59,28 +57,24 @@ const DayDots = ({ days, selectedDay, onSelectDay }) => {
 
   return (
     <div className="flex flex-col items-center gap-3 py-2">
-      {/* Dots más grandes y separados */}
       <div className="flex items-center gap-2.5">
         {days.map((day, index) => {
           const isActive = selectedDay === index;
-
           return (
             <button
               key={day.date}
               onClick={() => onSelectDay(index)}
               className={`rounded-full transition-all duration-200 ${
                 isActive
-                  ? 'w-8 h-2.5 bg-cyan-400 shadow-lg shadow-cyan-400/50'
-                  : 'w-2.5 h-2.5 bg-white/25 hover:bg-white/50 hover:scale-110'
+                  ? 'w-8 h-2 bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]'
+                  : 'w-2 h-2 bg-white/20 hover:bg-white/40 hover:scale-110'
               }`}
               aria-label={`Día ${index + 1}`}
             />
           );
         })}
       </div>
-
-      {/* Etiqueta del día activo más grande y visible */}
-      <p className="text-sm text-white/70 font-medium tracking-wide">
+      <p className="text-[10px] text-amber-500/80 font-bold uppercase tracking-widest">
         {getDayLabel(days[selectedDay].date, selectedDay)}
       </p>
     </div>
@@ -101,9 +95,9 @@ const CriticalHours = ({ hours }) => {
 
   if (critical.length === 0) {
     return (
-      <div className="p-4 text-center bg-emerald-500/10 border border-emerald-400/30 rounded-2xl">
-        <p className="text-emerald-300 font-medium text-sm">
-          ✅ No se esperan condiciones críticas este día
+      <div className="p-3 text-center bg-[#050505] border border-white/5 rounded-lg">
+        <p className="text-emerald-500/80 font-bold text-[10px] uppercase tracking-wider">
+          ✓ Condiciones estables
         </p>
       </div>
     );
@@ -112,23 +106,19 @@ const CriticalHours = ({ hours }) => {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <AlertTriangle className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
-        <h4 className="text-[10px] uppercase tracking-widest text-white/50 font-medium">
+        <AlertTriangle className="w-4 h-4 text-red-500" strokeWidth={1.5} />
+        <h4 className="text-[10px] uppercase tracking-widest text-red-400 font-bold">
           Horarios importantes
         </h4>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2">
         {critical.map((h, i) => (
-          <div
-            key={i}
-            className="p-3 rounded-xl bg-amber-500/10 border border-amber-400/30"
-          >
-            <p className="font-semibold text-sm text-white">
-              {h.hour}:00 hs · {h.windGusts} km/h
+          <div key={i} className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+            <p className="font-bold text-xs text-white uppercase tracking-wider">
+              {h.hour}:00 hs <span className="text-red-400 ml-1">({h.windGusts} km/h)</span>
             </p>
-            <p className="text-xs text-white/60 mt-1">
-              Dirección: {h.windInfo.direction} {h.windInfo.arrow}
+            <p className="text-[10px] text-white/50 mt-1 uppercase tracking-wider">
+              Dir: {h.windInfo.direction}
             </p>
           </div>
         ))}

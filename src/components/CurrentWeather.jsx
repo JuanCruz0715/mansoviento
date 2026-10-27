@@ -4,63 +4,52 @@ export const CurrentWeather = ({ currentWeather, getWindDirection, customLocatio
   if (!currentWeather) return null;
 
   const metrics = [
-    { icon: Thermometer, value: `${Math.round(currentWeather.main.feels_like)}°`, label: 'Sens.' },
+    { icon: Thermometer, value: `${Math.round(currentWeather.main.feels_like)}°`, label: 'Sens. Térmica' },
     { icon: CloudRain, value: `${currentWeather.main.humidity}%`, label: 'Humedad' },
-    {
-      icon: Wind,
-      value: `${(currentWeather.wind.speed * 3.6).toFixed(0)}`,
-      label: 'Viento km/h',
-      subtext: `${getWindDirection(currentWeather.wind.deg).arrow}`,
-    },
-    { icon: Navigation, value: `${currentWeather.main.pressure}`, label: 'hPa' },
-    { icon: Eye, value: `${(currentWeather.visibility / 1000).toFixed(1)}`, label: 'Vis. km' },
+    { icon: Wind, value: `${(currentWeather.wind.speed * 3.6).toFixed(0)} km/h`, label: 'Viento', subtext: getWindDirection(currentWeather.wind.deg).direction },
+    { icon: Navigation, value: `${currentWeather.main.pressure} hPa`, label: 'Presión' },
+    { icon: Eye, value: `${(currentWeather.visibility / 1000).toFixed(1)} km`, label: 'Visibilidad' },
   ];
 
   return (
-    <div className="relative rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-5 shadow-2xl shadow-black/20">
-      
-      {/* Ubicación */}
-      <div className="flex items-center gap-2 mb-4">
-        <MapPin className="w-4 h-4 text-cyan-400" strokeWidth={1.5} />
-        <span className="text-[10px] font-medium text-white/80 uppercase tracking-wider">
-          {customLocation?.name || 'San Juan'}
-        </span>
+    <div className="rounded-xl bg-[#0f0f11] border border-white/5 p-5 shadow-xl">
+      {/* Header de la tarjeta */}
+      <div className="flex items-center gap-2 mb-5 pb-3 border-b border-white/5">
+        <MapPin className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
+        <h3 className="text-xs font-bold text-white/90 uppercase tracking-widest">
+          Condiciones Actuales
+        </h3>
       </div>
 
-      {/* Temperatura principal */}
-      <div className="flex items-end gap-3 mb-6">
-        <div className="text-6xl font-bold text-white tracking-tighter leading-none">
+      {/* Temperatura */}
+      <div className="flex items-end gap-4 mb-6">
+        <div className="text-6xl font-light text-white tracking-tighter leading-none">
           {Math.round(currentWeather.main.temp)}°
         </div>
         <div className="pb-1">
-          <p className="text-sm text-white/90 capitalize font-medium leading-tight">
+          <p className="text-sm text-white capitalize font-medium leading-tight">
             {currentWeather.weather[0].description}
           </p>
-          <p className="text-[10px] text-white/50 mt-0.5">
-            Sensación {Math.round(currentWeather.main.feels_like)}°
+          <p className="text-[10px] text-amber-500/80 uppercase tracking-wider mt-1">
+            {customLocation?.name || 'San Juan'}
           </p>
         </div>
       </div>
 
-      {/* Grid de métricas (apilado para columna angosta) */}
-      <div className="grid grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
+      {/* Grid de métricas (estilo líneas limpias) */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-5">
         {metrics.map((metric, index) => (
-          <div
-            key={index}
-            className="rounded-xl bg-white/5 border border-white/5 p-2.5 flex items-center gap-3 hover:bg-white/10 transition-colors duration-200"
-          >
-            <metric.icon className="w-4 h-4 text-cyan-400 flex-shrink-0" strokeWidth={1.5} />
-            <div className="flex flex-col min-w-0">
-              <div className="text-sm font-semibold text-white tracking-tight leading-none">
-                {metric.value}
-              </div>
-              <div className="text-[9px] uppercase tracking-widest text-white/40 mt-0.5 truncate">
-                {metric.label}
-              </div>
+          <div key={index} className="flex flex-col gap-1">
+            <div className="flex items-center gap-1.5 text-white/40">
+              <metric.icon className="w-3.5 h-3.5" strokeWidth={1.5} />
+              <span className="text-[10px] uppercase tracking-wider">{metric.label}</span>
             </div>
-            {metric.subtext && (
-              <div className="ml-auto text-xs text-white/60">{metric.subtext}</div>
-            )}
+            <div className="text-lg font-medium text-white/90">
+              {metric.value}
+              {metric.subtext && (
+                <span className="text-xs text-white/40 ml-1.5 font-normal">{metric.subtext}</span>
+              )}
+            </div>
           </div>
         ))}
       </div>

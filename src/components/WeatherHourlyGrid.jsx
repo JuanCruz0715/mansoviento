@@ -35,22 +35,16 @@ const getWindBarBg = (speed) => {
   return 'bg-red-500';
 };
 
-// Detecta si las ráfagas son peligrosas (más del doble del viento sostenido)
 const isStrongGust = (windSpeed, windGusts) => {
   return windGusts > windSpeed * 1.8 && windGusts > 30;
 };
 
-// Componente de flecha que rota según los grados del viento
-// Open-Meteo devuelve "de dónde viene" el viento, así que rotamos +180° para que apunte hacia dónde va
-const WindArrow = ({ degrees = 0, size = 14 }) => (
+const WindArrow = ({ degrees = 0, size = 12 }) => (
   <ArrowUp
     size={size}
     strokeWidth={2.5}
     className="text-cyan-400"
-    style={{
-      transform: `rotate(${degrees + 180}deg)`,
-      transition: 'transform 200ms ease',
-    }}
+    style={{ transform: `rotate(${degrees + 180}deg)`, transition: 'transform 200ms ease' }}
   />
 );
 
@@ -67,13 +61,8 @@ export default function WeatherHourlyGrid({ day }) {
     setScrollLeft(scrollRef.current.scrollLeft);
   };
 
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => setIsDragging(false);
 
   const handleMouseMove = (e) => {
     if (!isDragging || !scrollRef.current) return;
@@ -85,10 +74,8 @@ export default function WeatherHourlyGrid({ day }) {
 
   if (!day || !day.hours || day.hours.length === 0) {
     return (
-      <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-5 sm:p-6">
-        <p className="text-center text-white/50 text-sm py-4">
-          Sin datos horarios
-        </p>
+      <div className="rounded-xl bg-[#0f0f11] border border-white/5 p-4">
+        <p className="text-center text-white/50 text-xs py-2">Sin datos horarios</p>
       </div>
     );
   }
@@ -96,138 +83,89 @@ export default function WeatherHourlyGrid({ day }) {
   const hours = day.hours;
 
   return (
-    <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/20">
-
+    <div className="rounded-xl bg-[#0f0f11] border border-white/5 overflow-hidden">
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseLeave}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
-        className={`w-full overflow-x-auto scrollbar-hide select-none ${
-          isDragging ? 'cursor-grabbing' : 'cursor-grab'
-        }`}
-        style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch',
-        }}
+        className={`w-full overflow-x-auto scrollbar-hide select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         <div className="min-w-max">
-
-          {/* ===== FILA: HORAS + ICONOS ===== */}
-          <div className="flex border-b border-white/10">
-
-            <div className="w-24 flex-shrink-0 bg-slate-900/60 backdrop-blur-md border-r border-white/10 flex items-end p-3 sticky left-0 z-10">
-              <span className="text-[10px] uppercase tracking-widest text-white/40 font-medium">
-                Horas
-              </span>
+          {/* FILA: HORAS + ICONOS */}
+          <div className="flex border-b border-white/5">
+            <div className="w-20 flex-shrink-0 bg-[#050505] border-r border-white/5 flex items-end p-2 sticky left-0 z-10">
+              <span className="text-[9px] uppercase tracking-widest text-white/40 font-bold">Horas</span>
             </div>
-
             <div className="flex">
               {hours.map((h, i) => (
-                <div
-                  key={i}
-                  className="w-11 flex flex-col items-center py-2 border-r border-white/5 last:border-r-0"
-                >
-                  <div className="text-[10px] text-white/50 mb-1">
-                    {h.hour}
-                  </div>
-                  <div className="text-lg">
-                    {getWeatherIcon(h.weatherCode)}
-                  </div>
+                <div key={i} className="w-10 flex flex-col items-center py-1.5 border-r border-white/5 last:border-r-0">
+                  <div className="text-[9px] text-white/50 mb-0.5">{h.hour}</div>
+                  <div className="text-sm">{getWeatherIcon(h.weatherCode)}</div>
                 </div>
               ))}
             </div>
           </div>
 
+          {/* TEMP */}
           <GridRow label="Temp" unit="°C">
             <div className="flex">
               {hours.map((h, i) => (
-                <div
-                  key={i}
-                  className="w-11 py-2 text-center text-sm font-medium text-white/90 border-r border-white/5 last:border-r-0"
-                >
+                <div key={i} className="w-10 py-1.5 text-center text-xs font-medium text-white/90 border-r border-white/5 last:border-r-0">
                   {h.temperature}°
                 </div>
               ))}
             </div>
           </GridRow>
 
+          {/* SENS */}
           <GridRow label="Sens." unit="°C">
             <div className="flex">
               {hours.map((h, i) => (
-                <div
-                  key={i}
-                  className="w-11 py-2 text-center text-xs text-white/60 border-r border-white/5 last:border-r-0"
-                >
+                <div key={i} className="w-10 py-1.5 text-center text-[10px] text-white/60 border-r border-white/5 last:border-r-0">
                   {h.feelsLike ? `${h.feelsLike}°` : '—'}
                 </div>
               ))}
             </div>
           </GridRow>
 
+          {/* LLUVIA */}
           <GridRow label="Lluvia" unit="mm">
             <div className="flex">
               {hours.map((h, i) => (
-                <div
-                  key={i}
-                  className={`w-11 py-2 text-center text-xs border-r border-white/5 last:border-r-0 ${
-                    h.precipitation > 0 ? 'text-cyan-300 font-medium' : 'text-white/30'
-                  }`}
-                >
+                <div key={i} className={`w-10 py-1.5 text-center text-[10px] border-r border-white/5 last:border-r-0 ${h.precipitation > 0 ? 'text-cyan-300 font-medium' : 'text-white/30'}`}>
                   {h.precipitation > 0 ? h.precipitation.toFixed(1) : '·'}
                 </div>
               ))}
             </div>
           </GridRow>
 
+          {/* VIENTO */}
           <GridRow label="Viento" unit="km/h">
             <div className="flex">
               {hours.map((h, i) => (
-                <div
-                  key={i}
-                  className="w-11 py-2 flex flex-col items-center gap-0.5 border-r border-white/5 last:border-r-0"
-                >
-                  <span className={`text-xs font-medium ${getWindColor(h.windSpeed)}`}>
-                    {h.windSpeed}
-                  </span>
-                  <div className="w-8 h-1 rounded-full bg-white/10 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${getWindBarBg(h.windSpeed)}`}
-                      style={{ width: `${Math.min((h.windSpeed / 60) * 100, 100)}%` }}
-                    />
+                <div key={i} className="w-10 py-1.5 flex flex-col items-center gap-0.5 border-r border-white/5 last:border-r-0">
+                  <span className={`text-[10px] font-medium ${getWindColor(h.windSpeed)}`}>{h.windSpeed}</span>
+                  <div className="w-6 h-0.5 rounded-full bg-white/10 overflow-hidden">
+                    <div className={`h-full rounded-full ${getWindBarBg(h.windSpeed)}`} style={{ width: `${Math.min((h.windSpeed / 60) * 100, 100)}%` }} />
                   </div>
                 </div>
               ))}
             </div>
           </GridRow>
 
+          {/* RACHAS */}
           <GridRow label="Rachas" unit="km/h">
             <div className="flex">
               {hours.map((h, i) => {
                 const strong = isStrongGust(h.windSpeed, h.windGusts);
                 return (
-                  <div
-                    key={i}
-                    className="w-11 py-2 flex flex-col items-center gap-0.5 border-r border-white/5 last:border-r-0"
-                  >
-                    <span
-                      className={`text-xs font-medium ${
-                        strong
-                          ? 'text-amber-400 font-bold'
-                          : getWindColor(h.windGusts)
-                      }`}
-                    >
-                      {h.windGusts}
-                    </span>
-                    <div className="w-8 h-1 rounded-full bg-white/10 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          strong ? 'bg-amber-400' : getWindBarBg(h.windGusts)
-                        }`}
-                        style={{ width: `${Math.min((h.windGusts / 60) * 100, 100)}%` }}
-                      />
+                  <div key={i} className="w-10 py-1.5 flex flex-col items-center gap-0.5 border-r border-white/5 last:border-r-0">
+                    <span className={`text-[10px] font-medium ${strong ? 'text-amber-400 font-bold' : getWindColor(h.windGusts)}`}>{h.windGusts}</span>
+                    <div className="w-6 h-0.5 rounded-full bg-white/10 overflow-hidden">
+                      <div className={`h-full rounded-full ${strong ? 'bg-amber-400' : getWindBarBg(h.windGusts)}`} style={{ width: `${Math.min((h.windGusts / 60) * 100, 100)}%` }} />
                     </div>
                   </div>
                 );
@@ -235,45 +173,34 @@ export default function WeatherHourlyGrid({ day }) {
             </div>
           </GridRow>
 
+          {/* DIRECCIÓN */}
           <GridRow label="Direc." unit="">
             <div className="flex">
               {hours.map((h, i) => (
-                <div
-                  key={i}
-                  className="w-11 py-2 flex items-center justify-center border-r border-white/5 last:border-r-0"
-                >
-                  <WindArrow degrees={h.windDirection || 0} size={14} />
+                <div key={i} className="w-10 py-1.5 flex items-center justify-center border-r border-white/5 last:border-r-0">
+                  <WindArrow degrees={h.windDirection || 0} size={12} />
                 </div>
               ))}
             </div>
           </GridRow>
-
         </div>
       </div>
-
+      
       {/* Nota aclaratoria */}
-      <div className="px-5 py-3 border-t border-white/5 bg-white/[0.02]">
-        <p className="text-[10px] text-white/40 leading-relaxed">
-          <strong className="text-white/60">Viento:</strong> velocidad sostenida promedio. <strong className="text-white/60">Rachas:</strong> máximas instantáneas, pueden ser hasta 2× más fuertes.
+      <div className="px-3 py-1.5 border-t border-white/5 bg-[#050505]/50">
+        <p className="text-[8px] text-white/30 leading-tight uppercase tracking-wider">
+          Viento: vel. sostenida · Rachas: máx. instantáneas
         </p>
       </div>
     </div>
   );
 }
 
-/* ====== Helpers ====== */
-
 const GridRow = ({ label, unit, children }) => (
   <div className="flex border-b border-white/5 last:border-b-0">
-    <div className="w-24 flex-shrink-0 bg-slate-900/40 backdrop-blur-md border-r border-white/10 py-2 px-3 flex items-center justify-between sticky left-0 z-10">
-      <span className="text-[10px] uppercase tracking-widest text-white/50 font-medium">
-        {label}
-      </span>
-      {unit && (
-        <span className="text-[9px] text-white/30">
-          {unit}
-        </span>
-      )}
+    <div className="w-20 flex-shrink-0 bg-[#050505] border-r border-white/5 py-1.5 px-2 flex items-center justify-between sticky left-0 z-10">
+      <span className="text-[9px] uppercase tracking-widest text-white/50 font-bold">{label}</span>
+      {unit && <span className="text-[8px] text-white/30">{unit}</span>}
     </div>
     {children}
   </div>
